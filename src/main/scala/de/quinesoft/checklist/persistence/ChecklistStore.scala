@@ -1,5 +1,6 @@
 package de.quinesoft.checklist.persistence
 
+import akka.Done
 import de.quinesoft.checklist.model.ToDoItem
 
 import scala.concurrent.Future
@@ -8,13 +9,15 @@ import scala.concurrent.Future
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
 trait ChecklistStore {
-  type Id = String
+  def add(newItem: ToDoItem): Future[Done]
 
-  def add(newItem: ToDoItem): Future[Unit]
+  def delete(id: String): Future[Done]
 
-  def delete(id: Id): Future[Unit]
+  def get(id: String): Future[Option[ToDoItem]]
 
-  def get(id: Id): Future[Option[ToDoItem]]
+  def getAll: Future[List[ToDoItem]]
 
-  def keys(): Set[Id]
+  def done(id: String): Future[Done]
+
+  def keys: Future[Set[String]]
 }
