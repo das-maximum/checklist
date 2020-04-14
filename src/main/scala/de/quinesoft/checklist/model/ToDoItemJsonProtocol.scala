@@ -8,7 +8,7 @@ import spray.json.{DefaultJsonProtocol, DeserializationException, JsString, JsVa
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-class ToDoItemJsonProtocol extends DefaultJsonProtocol {
+object ToDoItemJsonProtocol extends DefaultJsonProtocol {
 
   implicit val instantProtocol: RootJsonFormat[Instant] = new RootJsonFormat[Instant] {
     override def read(json: JsValue): Instant = json match {
@@ -17,7 +17,7 @@ class ToDoItemJsonProtocol extends DefaultJsonProtocol {
           Instant.parse(value)
         } catch {
           case _: DateTimeParseException =>
-            throw DeserializationException(s"Timestamp has wrong format. Must be like this: 2020-03-31T21:10:43Z. Found $s")
+            throw DeserializationException(s"Timestamp has wrong format. Must be like this: 2020-03-31T21:10:43Z. Found $value")
         }
 
       case _ =>
