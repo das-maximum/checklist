@@ -18,14 +18,16 @@ object MapStore extends ChecklistStore {
     ToDoItem(text = "Cheese")
   )
 
-  override def done(id: String): Future[Done] = {
-    cache = cache.map(item => if (item.id == id) item.copy(done = true) else item)
+
+  override def update(changedItem: ToDoItem): Future[Done] = {
+    cache = cache.map(item => if (item.id == changedItem.id) changedItem else item)
     Future.successful(Done)
   }
 
-  override def add(newItem: ToDoItem): Future[Done] = {
-    cache = newItem :: cache
-    Future.successful(Done)
+  override def add(newItem: String): Future[ToDoItem] = {
+    val newToDo = ToDoItem(text = newItem)
+    cache = newToDo :: cache
+    Future.successful(newToDo)
   }
 
   override def get(id: String): Future[Option[ToDoItem]] =
@@ -36,7 +38,6 @@ object MapStore extends ChecklistStore {
   override def delete(id: String): Future[Done] = {
     cache = cache.filterNot(item => item.id == id)
     Future.successful(Done)
-    //Future.failed(new NotImplementedError("This operation is not yet implemented"))
   }
 
   override def keys(): Future[Set[String]] =
