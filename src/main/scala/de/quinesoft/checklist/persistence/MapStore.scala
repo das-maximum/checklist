@@ -35,9 +35,14 @@ object MapStore extends ChecklistStore {
 
   override def getAll: Future[List[ToDoItem]] = Future.successful(cache)
 
-  override def delete(id: String): Future[Done] = {
-    cache = cache.filterNot(item => item.id == id)
-    Future.successful(Done)
+  override def delete(id: String): Future[Option[String]] = {
+    val tmpCache = cache.filterNot(item => item.id == id)
+    if (tmpCache.length == cache.length) {
+      Future.successful(None)
+    } else {
+      cache = tmpCache
+      Future.successful(Some(id))
+    }
   }
 
   override def keys(): Future[Set[String]] =

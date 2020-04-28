@@ -13,7 +13,7 @@ trait ChecklistStore {
 
   def update(changedItem: ToDoItem): Future[Done]
 
-  def delete(id: String): Future[Done]
+  def delete(id: String): Future[Option[String]]
 
   def get(id: String): Future[Option[ToDoItem]]
 
