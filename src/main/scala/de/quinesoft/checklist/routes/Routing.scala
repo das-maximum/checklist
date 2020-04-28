@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers.{`Access-Control-Allow-Credentials`, `Access-Control-Allow-Headers`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Origin`}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
+import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.model.ToDoItem
 import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
 import de.quinesoft.checklist.persistence.{ChecklistStore, MapStore}
@@ -16,6 +17,7 @@ import spray.json.DefaultJsonProtocol
  */
 object Routing extends SprayJsonSupport with DefaultJsonProtocol with CORSHandler {
 
+  private val logger: Logger = Logger(Routing.getClass.getCanonicalName)
   val store: ChecklistStore = MapStore
 
   def routes: Route = pathPrefix("api") {
@@ -23,29 +25,29 @@ object Routing extends SprayJsonSupport with DefaultJsonProtocol with CORSHandle
       path("todo") {
         get {
           parameter('id.?) {
-            case Some(id) => complete(store.get(id))
-            case None =>     complete((StatusCodes.OK, store.keys))
+            case Some(id) => logger.info(s"Get todo with $id"); rejectEmptyResponse(complete(store.get(id)))
+            case None =>     logger.info("Get all todo keys"); complete((StatusCodes.OK, store.keys))
           }
         } ~
         post {
           entity(as[String]) {
-            newItem => complete(store.add(newItem))
+            newItem => logger.info(s"Add new item $newItem"); complete(store.add(newItem))
           }
         } ~
         put {
           entity(as[ToDoItem]) {
-            item => complete(store.update(item))
+            item => logger.info(s"Update item $item"); complete(store.update(item))
           }
         } ~
         delete {
           parameter('id) {
-            id => complete(store.delete(id))
+            id => logger.info(s"Delete todo with $id"); rejectEmptyResponse(complete(store.delete(id)))
           }
         }
       } ~
       path("todo" / "full") {
         get {
-          complete(store.getAll)
+          logger.info("Get all todos"); complete(store.getAll)
         }
       }
     }
