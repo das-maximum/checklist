@@ -1,5 +1,6 @@
 package de.quinesoft.checklist.routes
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.model.HttpMethods._
@@ -7,47 +8,62 @@ import akka.http.scaladsl.model.headers.{`Access-Control-Allow-Credentials`, `Ac
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
 import com.typesafe.scalalogging.Logger
+import de.quinesoft.checklist.config.ChecklistConfig
 import de.quinesoft.checklist.model.ToDoItem
 import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
 import de.quinesoft.checklist.persistence.{ChecklistStore, MapStore}
 import spray.json.DefaultJsonProtocol
 
+import scala.concurrent.ExecutionContext
+
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-object Routing extends SprayJsonSupport with DefaultJsonProtocol with CORSHandler {
+class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends SprayJsonSupport with DefaultJsonProtocol with CORSHandler {
 
-  private val logger: Logger = Logger(Routing.getClass.getCanonicalName)
-  val store: ChecklistStore = MapStore
+  private val logger: Logger = Logger(this.getClass.getCanonicalName)
+  private val store: ChecklistStore = new MapStore(config)
 
   def routes: Route = pathPrefix("api") {
     corsHandler {
       path("todo") {
         get {
           parameter('id.?) {
-            case Some(id) => logger.info(s"Get todo with $id"); rejectEmptyResponse(complete(store.get(id)))
-            case None =>     logger.info("Get all todo keys"); complete((StatusCodes.OK, store.keys))
+            case Some(id) =>
+              logger.info(s"Get todo with $id")
+              rejectEmptyResponse(complete(store.get(id)))
+            case None =>
+              logger.info("Get all todo keys")
+              complete((StatusCodes.OK, store.keys))
           }
         } ~
         post {
           entity(as[String]) {
-            newItem => logger.info(s"Add new item $newItem"); complete(store.add(newItem))
+            newToDoText =>
+              logger.info(s"Add new item $newToDoText")
+              onSuccess(store.add(newToDoText)) {
+                case Some(value) => complete((StatusCodes.Created, value))
+                case None => complete((StatusCodes.BadRequest, "Cannot create new item without text"))
+              }
           }
         } ~
         put {
           entity(as[ToDoItem]) {
-            item => logger.info(s"Update item $item"); complete(store.update(item))
+            item => logger.info(s"Update item $item")
+              complete(store.update(item))
           }
         } ~
         delete {
           parameter('id) {
-            id => logger.info(s"Delete todo with $id"); rejectEmptyResponse(complete(store.delete(id)))
+            id => logger.info(s"Delete todo with $id")
+              complete(store.delete(id))
           }
         }
       } ~
       path("todo" / "full") {
         get {
-          logger.info("Get all todos"); complete(store.getAll)
+          logger.info("Get all todos")
+          complete(store.getAll)
         }
       }
     }
