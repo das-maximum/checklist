@@ -1,12 +1,14 @@
 package de.quinesoft.checklist.config
 
-import pureconfig.ConfigReader
-
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-case class ChecklistConfig(host: String, port: Int)
 
-object ChecklistConfig {
-  implicit val configReader: ConfigReader[ChecklistConfig] = pureconfig.module.magnolia.auto.reader.exportReader
-}
+
+case class ChecklistConfig(host: String,
+                           port: Port,
+                           storage: StorageConfig)
+case class Port(number: Int) extends AnyVal
+
+case class StorageConfig(path: String, writeDelaySec: WriteDelaySec)
+case class WriteDelaySec(number: Int) extends AnyVal

@@ -15,7 +15,7 @@ object Checklist extends App {
   private implicit val system: ActorSystem = ActorSystem("checklist")
 
   logger.info("Loading config")
-  val config: ChecklistConfig = ConfigSource.file("src/main/resources/application.conf").loadOrThrow[ChecklistConfig]
+  val config: ChecklistConfig = ConfigSource.default.loadOrThrow[ChecklistConfig]
 
   logger.info("Starting server")
   Http().bindAndHandle(Routing.routes, config.host, config.port)

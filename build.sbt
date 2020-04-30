@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
 
   "io.spray" %%  "spray-json" % "1.3.5",
 
-  "com.github.pureconfig" %% "pureconfig-magnolia" % "0.12.2",
+  "com.github.pureconfig" %% "pureconfig" % "0.12.3",
 
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "ch.qos.logback" % "logback-classic" % "1.2.3"
