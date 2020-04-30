@@ -9,11 +9,11 @@ import scala.concurrent.Future
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
 trait ChecklistStore {
-  def add(newItem: String): Future[ToDoItem]
+  def add(newItem: String): Future[Option[ToDoItem]]
 
   def update(changedItem: ToDoItem): Future[Done]
 
-  def delete(id: String): Future[Option[String]]
+  def delete(id: String): Future[Done]
 
   def get(id: String): Future[Option[ToDoItem]]
 
