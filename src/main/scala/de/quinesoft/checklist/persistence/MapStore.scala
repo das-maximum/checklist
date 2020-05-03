@@ -83,30 +83,32 @@ class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor
   }
 
   private def writeToDisk(): Unit = {
-    val tmp = persistingQueue
-    logger.info(s"Writing ${tmp.size} elements")
+    if (persistingQueue.nonEmpty) {
+      val tmp = persistingQueue
+      logger.info(s"Writing ${tmp.size} elements")
 
-    tmp.foreach(item => {
-      val path: Path = Paths.get(config.storage.path).resolve(item.id)
-      item.todo match {
-        case Some(value) =>
-          import spray.json._
-          import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
+      tmp.foreach(item => {
+        val path: Path = Paths.get(config.storage.path).resolve(item.id)
+        item.todo match {
+          case Some(value) =>
+            import spray.json._
+            import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
 
-          logger.info(s"Writing $path")
-          Files.writeString(
-            path,
-            value.toJson.compactPrint,
-            StandardCharsets.UTF_8,
-            StandardOpenOption.CREATE,
-            StandardOpenOption.WRITE,
-            StandardOpenOption.TRUNCATE_EXISTING)
-        case None =>
-          logger.info(s"Deleting item ${item.id} @ $path")
-          Files.deleteIfExists(path)
-      }
-    })
+            logger.debug(s"Writing $path")
+            Files.writeString(
+              path,
+              value.toJson.compactPrint,
+              StandardCharsets.UTF_8,
+              StandardOpenOption.CREATE,
+              StandardOpenOption.WRITE,
+              StandardOpenOption.TRUNCATE_EXISTING)
+          case None =>
+            logger.debug(s"Deleting item ${item.id} @ $path")
+            Files.deleteIfExists(path)
+        }
+      })
 
-    persistingQueue = persistingQueue.diff(tmp)
+      persistingQueue = persistingQueue.diff(tmp)
+    }
   }
 }
