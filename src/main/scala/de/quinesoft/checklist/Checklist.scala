@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.ChecklistConfig
 import de.quinesoft.checklist.routes.Routing
 import pureconfig.ConfigSource
+import pureconfig.generic.auto._
 import scala.concurrent.ExecutionContext
 
 /**
