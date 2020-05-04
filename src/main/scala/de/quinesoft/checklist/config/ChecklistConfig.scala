@@ -7,6 +7,7 @@ package de.quinesoft.checklist.config
 
 case class ChecklistConfig(host: String,
                            port: Port,
+                           version: String,
                            storage: StorageConfig)
 case class Port(number: Int) extends AnyVal
 

@@ -65,6 +65,11 @@ class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor:
           logger.info("Get all todos")
           complete(store.getAll)
         }
+      } ~
+      path( "version") {
+        get {
+          complete((StatusCodes.OK, config.version))
+        }
       }
     }
   }
