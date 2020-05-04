@@ -69,9 +69,10 @@ class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor
   private def loadExistingItems(): Unit = {
     import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
     import spray.json._
+    logger.info("Loading stored items")
     Files.newDirectoryStream(Paths.get(config.storage.path)).forEach(
       singleFile => {
-        logger.info(s"Reading in file ${singleFile.toString}")
+        logger.debug(s"Reading in file ${singleFile.toString}")
         val item = Source.fromFile(singleFile.toUri)(Codec.UTF8).mkString.parseJson.convertTo[ToDoItem]
         cache += (item.id -> item)
       }
