@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext
 class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends SprayJsonSupport with DefaultJsonProtocol with CORSHandler {
 
   private val logger: Logger = Logger(this.getClass.getCanonicalName)
-  private val store: ChecklistStore = new MapStore(config)
+  private val store: ChecklistStore = new MapStore(config.storage)
 
   def routes: Route = pathPrefix("api") {
     corsHandler {

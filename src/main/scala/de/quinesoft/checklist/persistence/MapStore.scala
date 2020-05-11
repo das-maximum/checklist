@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 import akka.Done
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.Logger
-import de.quinesoft.checklist.config.ChecklistConfig
+import de.quinesoft.checklist.config.StorageConfig
 import de.quinesoft.checklist.model.ToDoItem
 
 import scala.collection.immutable.Queue
@@ -18,7 +18,7 @@ import scala.io.{Codec, Source}
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends ChecklistStore with PersistentStore {
+class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends ChecklistStore with PersistentStore {
 
   private val logger = Logger(classOf[MapStore])
 
@@ -70,7 +70,7 @@ class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor
     import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
     import spray.json._
     logger.info("Loading stored items")
-    Files.newDirectoryStream(Paths.get(config.storage.path)).forEach(
+    Files.newDirectoryStream(Paths.get(storage.path)).forEach(
       singleFile => {
         logger.debug(s"Reading in file ${singleFile.toString}")
         val item = Source.fromFile(singleFile.toUri)(Codec.UTF8).mkString.parseJson.convertTo[ToDoItem]
@@ -79,7 +79,7 @@ class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor
     )
   }
 
-  private def startPersisting(): Unit = actor.scheduler.scheduleAtFixedRate(initialDelay = FiniteDuration(0, TimeUnit.SECONDS), interval = FiniteDuration(config.storage.writeDelaySec.number, TimeUnit.SECONDS)) {
+  private def startPersisting(): Unit = actor.scheduler.scheduleAtFixedRate(initialDelay = FiniteDuration(0, TimeUnit.SECONDS), interval = FiniteDuration(storage.writeDelaySec.number, TimeUnit.SECONDS)) {
     () => writeToDisk()
   }
 
@@ -89,7 +89,7 @@ class MapStore(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor
       logger.info(s"Writing ${tmp.size} elements")
 
       tmp.foreach(item => {
-        val path: Path = Paths.get(config.storage.path).resolve(item.id)
+        val path: Path = Paths.get(storage.path).resolve(item.id)
         item.todo match {
           case Some(value) =>
             import spray.json._
