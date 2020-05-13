@@ -30,9 +30,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
 
   override def update(changedItem: ToDoItem): Future[Done] = {
     cache = cache + (changedItem.id -> changedItem)
-    Future(
-      persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
-    )
+    persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
     Future.successful(Done)
   }
 
@@ -41,9 +39,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
     case _ =>
       val newToDo = ToDoItem(text = newItem)
       cache += (newToDo.id -> newToDo)
-      Future(
-        persist(PersistingToDoItem(newToDo.id, Some(newToDo)))
-      )
+      persist(PersistingToDoItem(newToDo.id, Some(newToDo)))
       Future.successful(Some(newToDo))
   }
 
@@ -54,9 +50,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
 
   override def delete(id: String): Future[Done] = {
     cache -= id
-    Future(
-      persist(PersistingToDoItem(id, None))
-    )
+    persist(PersistingToDoItem(id, None))
     Future.successful(Done)
   }
 
