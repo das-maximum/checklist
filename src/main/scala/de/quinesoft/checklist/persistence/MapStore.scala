@@ -64,14 +64,18 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
     persistingQueue = persistingQueue :+ item
 
   private def loadExistingItems(): Unit = {
-    import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
-    import spray.json._
     logger.info("Loading stored items")
+
     Files.newDirectoryStream(Paths.get(storage.path)).forEach(
       singleFile => {
+        import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
+        import spray.json._
+
         logger.debug(s"Reading in file ${singleFile.toString}")
-        val item = Source.fromFile(singleFile.toUri)(Codec.UTF8).mkString.parseJson.convertTo[ToDoItem]
+        val source = Source.fromFile(singleFile.toUri)(Codec.UTF8)
+        val item = source.mkString.parseJson.convertTo[ToDoItem]
         cache += (item.id -> item)
+        source.close()
       }
     )
   }
