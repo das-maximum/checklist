@@ -66,7 +66,7 @@ class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor:
           complete(store.getAll)
         }
       } ~
-      path( "version") {
+      path("version") {
         get {
           complete((StatusCodes.OK, config.version))
         }
