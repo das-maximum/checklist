@@ -1,11 +1,13 @@
 val name = "checklist"
 val version = "0.1"
-val scalaVersion = "2.13.1"
+val scalaVersion = "2.13.2"
 
 val akkaVersion = "2.6.4"
 val akkaHttpVersion = "10.1.11"
 
 //scalacOptions += "-Xfatal-warnings"
+
+crossScalaVersions += "2.13.1"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
