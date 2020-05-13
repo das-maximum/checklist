@@ -32,9 +32,11 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
     if (!cache.contains(changedItem.id)) {
       Future.failed(new UnsupportedOperationException("Cannot change unknown item"))
     }
-    cache = cache + (changedItem.id -> changedItem)
-    persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
-    Future.successful(Done)
+    else {
+      cache = cache + (changedItem.id -> changedItem)
+      persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
+      Future.successful(Done)
+    }
   }
 
   override def add(newItem: String): Future[Option[ToDoItem]] = newItem.trim match {
