@@ -29,6 +29,9 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   startPersisting()
 
   override def update(changedItem: ToDoItem): Future[Done] = {
+    if (!cache.contains(changedItem.id)) {
+      Future.failed(new UnsupportedOperationException("Cannot change unknown item"))
+    }
     cache = cache + (changedItem.id -> changedItem)
     persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
     Future.successful(Done)
