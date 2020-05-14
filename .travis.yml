@@ -1,3 +1,9 @@
 language: scala
 scala:
   - 2.13.1
+notifications:
+  email:
+    recipients:
+      - krickl@quinesoft.de
+    on_success: always # default: change
+    on_failure: always # default: always
