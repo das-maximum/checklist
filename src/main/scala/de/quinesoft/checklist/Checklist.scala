@@ -1,5 +1,10 @@
 package de.quinesoft.checklist
 
+import java.io.BufferedWriter
+import java.lang.management.ManagementFactory
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.scalalogging.Logger
@@ -7,6 +12,7 @@ import de.quinesoft.checklist.config.ChecklistConfig
 import de.quinesoft.checklist.routes.Routing
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
+
 import scala.concurrent.ExecutionContext
 
 /**
@@ -20,6 +26,17 @@ object Checklist extends App {
   logger.info("Loading config")
   val config: ChecklistConfig = ConfigSource.default.loadOrThrow[ChecklistConfig]
 
+  logger.debug("Write pid file")
+  writePidFile()
+
   logger.info("Starting server")
   Http().bindAndHandle(new Routing(config).routes, config.host, config.port.number)
+
+  private def writePidFile(): Unit = {
+    val pidPath: Path = Paths.get("./checklist.pid")
+    val pid: String = ManagementFactory.getRuntimeMXBean.getName.split('@')(0)
+    val writer: BufferedWriter = Files.newBufferedWriter(pidPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+    writer.write(pid)
+    writer.close()
+  }
 }
