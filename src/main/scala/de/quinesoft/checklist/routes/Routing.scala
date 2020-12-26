@@ -1,7 +1,6 @@
 package de.quinesoft.checklist.routes
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers.{`Access-Control-Allow-Credentials`, `Access-Control-Allow-Headers`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Origin`}
@@ -10,20 +9,19 @@ import akka.http.scaladsl.server.{Directive0, Route}
 import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.ChecklistConfig
 import de.quinesoft.checklist.model.ToDoItem
-import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
 import de.quinesoft.checklist.persistence.{ChecklistStore, MapStore}
-import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.ExecutionContext
 
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends SprayJsonSupport with DefaultJsonProtocol with CORSHandler {
+class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends CORSHandler {
 
   private val logger: Logger = Logger(this.getClass.getCanonicalName)
   private val store: ChecklistStore = new MapStore(config.storage)
 
+  import io.circe.generic.auto._
   def routes: Route = pathPrefix("api") {
     corsHandler {
       path("todo") {
