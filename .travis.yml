@@ -1,9 +1,18 @@
 language: scala
 scala:
-  - 2.13.1
+- 2.13.4
 notifications:
   email:
     recipients:
-      - krickl@quinesoft.de
-    on_success: always # default: change
-    on_failure: always # default: always
+    - krickl@quinesoft.de
+    on_success: always
+    on_failure: always
+script:
+- sbt compile || travis_terminate 1
+- sbt coverage test coverageReport || travis_terminate 1
+- sbt coverageAggregate
+after_success:
+- sbt coveralls
+env:
+  global:
+    secure: vui48+VTofJ7/axrvLzRfmQUmyPKr7rch5bDL/9c3WfKldBL86u/cNK2IgEXl82VUvlvbOtAbIpaI5whHjua3LJtvJ+QPKtpZo/A8TTXvnPpIT6wI6cQNz0Wnx2bgtgM3NCDlfl7rElmFudOunem0cmD5dRYNfscwpLqKemmaQmIQD8A5xdEAzSuS46G3uCUTkmmeF5aXX5A1lIdNoe6WBTrh0q8aQ8VPunVF1/Uujq7GnI1jVgdStAY59G1IOWSHfUEpSOGzx0dnsHs7wXWzgKbVcMmxZHON+1EsO0VZ6+Koh5uZRZN9RKItcER0GpyhEXRD7WGrKK95MvAGyklyeHP0UyDGYSKNV27MHBnHYe1kySfynWP6sr7Zj4zHFw2fTzimpApVZGP43LHiaIc/O+JIdLi1dyWGHBX/UHRy4I46xCQsmbaiv4E1sHPL1fBfAMWUwb3n1/LVA7235Ztf+GbVq/uuEyCSPHZ1Z2KhI1aQ43mqAn49Hfg9iG6jLmM/HS+FgRT2ZsVeW6bkGc3Iu6qj6hhXttXhi2pTh0g0Svp76bcONA6dybIebB1LUlcfRM0T2cl44PA5A+lVOZsaEO0J5VkjLcsH6N0fSMWL82jErzEX7bZeoBRzMml8bayu4n+oZ32gdTtfh/QrM/RHYncGGthWWAxfTPs29J84Y4=
