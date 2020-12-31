@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers.{`Access-Control-Allow-Credentials`, `Ac
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
 import com.typesafe.scalalogging.Logger
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import de.quinesoft.checklist.config.ChecklistConfig
 import de.quinesoft.checklist.model.ToDoItem
 import de.quinesoft.checklist.persistence.{ChecklistStore, MapStore}
@@ -16,12 +17,11 @@ import scala.concurrent.ExecutionContext
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
-class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends CORSHandler {
+class Routing(config: ChecklistConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends CORSHandler with FailFastCirceSupport {
 
   private val logger: Logger = Logger(this.getClass.getCanonicalName)
   private val store: ChecklistStore = new MapStore(config.storage)
 
-  import io.circe.generic.auto._
   def routes: Route = pathPrefix("api") {
     corsHandler {
       path("todo") {
