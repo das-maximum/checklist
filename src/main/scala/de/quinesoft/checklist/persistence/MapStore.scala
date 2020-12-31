@@ -3,17 +3,18 @@ package de.quinesoft.checklist.persistence
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import java.util.concurrent.TimeUnit
-
 import akka.Done
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.StorageConfig
 import de.quinesoft.checklist.model.ToDoItem
+import io.circe.Decoder.Result
+import io.circe.syntax.EncoderOps
 
 import scala.collection.immutable.Queue
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.{Codec, Source}
+import scala.io.{BufferedSource, Codec, Source}
 
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
@@ -70,13 +71,14 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
 
     Files.newDirectoryStream(Paths.get(storage.path)).forEach(
       singleFile => {
-        import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
-        import spray.json._
-
         logger.debug(s"Reading in file ${singleFile.toString}")
-        val source = Source.fromFile(singleFile.toUri)(Codec.UTF8)
-        val item = source.mkString.parseJson.convertTo[ToDoItem]
-        cache += (item.id -> item)
+        val source: BufferedSource = Source.fromFile(singleFile.toUri)(Codec.UTF8)
+        val item: Result[ToDoItem] = source.mkString.asJson.as[ToDoItem]
+
+        item match {
+          case Left(value) => logger.warn(s"Could not parse $singleFile: $value")
+          case Right(value) => cache += (value.id -> value)
+        }
         source.close()
       }
     )
@@ -95,13 +97,11 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
         val path: Path = Paths.get(storage.path).resolve(item.id)
         item.todo match {
           case Some(value) =>
-            import spray.json._
-            import de.quinesoft.checklist.model.ToDoItemJsonProtocol._
 
             logger.debug(s"Writing $path")
             Files.writeString(
               path,
-              value.toJson.compactPrint,
+              value.asJson.noSpaces,
               StandardCharsets.UTF_8,
               StandardOpenOption.CREATE,
               StandardOpenOption.WRITE,
