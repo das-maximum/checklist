@@ -62,9 +62,9 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
 
   "getAll" should "respond with all items" in {
     val allItems: Future[Seq[ToDoItem]] = for {
-      _ <- sut.add("Cheese")
-      _ <- sut.add("Milk")
-      _ <- sut.add("Bread")
+      _                       <- sut.add("Cheese")
+      _                       <- sut.add("Milk")
+      _                       <- sut.add("Bread")
       allItems: Seq[ToDoItem] <- sut.getAll
     } yield allItems
 
@@ -78,9 +78,9 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
 
   "keys" should "result the same number of elements" in {
     val keys: Future[Set[String]] = for {
-      _ <- sut.add("Cheese")
-      _ <- sut.add("Milk")
-      _ <- sut.add("Bread")
+      _                 <- sut.add("Cheese")
+      _                 <- sut.add("Milk")
+      _                 <- sut.add("Bread")
       keys: Set[String] <- sut.keys
     } yield keys
 
