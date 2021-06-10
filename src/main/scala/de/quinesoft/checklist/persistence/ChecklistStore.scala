@@ -1,23 +1,20 @@
 package de.quinesoft.checklist.persistence
 
-import akka.Done
 import de.quinesoft.checklist.model.ToDoItem
-
-import scala.concurrent.Future
 
 /**
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
 trait ChecklistStore {
-  def add(newItem: String): Future[Option[ToDoItem]]
+  def add(newItem: String): Option[ToDoItem]
 
-  def update(changedItem: ToDoItem): Future[Done]
+  def update(changedItem: ToDoItem): Boolean
 
-  def delete(id: String): Future[Done]
+  def delete(id: String): Unit
 
-  def get(id: String): Future[Option[ToDoItem]]
+  def get(id: String): Option[ToDoItem]
 
-  def getAll: Future[List[ToDoItem]]
+  def getAll: List[ToDoItem]
 
-  def keys: Future[Set[String]]
+  def keys: Set[String]
 }
