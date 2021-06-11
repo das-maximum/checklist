@@ -1,6 +1,6 @@
 val name = "checklist"
 val version = "0.1"
-val scalaVersion = "2.13.5"
+val scalaVersion = "2.13.6"
 
 val akkaVersion = "2.6.14"
 val akkaHttpVersion = "10.2.4"
