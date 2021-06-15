@@ -28,6 +28,16 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   loadExistingItems()
   startPersisting()
 
+  override def add(newItem: ToDoItem): Boolean =
+    if (cache.contains(newItem.id)) {
+      false
+    }
+    else {
+      cache += (newItem.id -> newItem)
+      persist(PersistingToDoItem(newItem.id, Some(newItem)))
+      true
+    }
+
   override def update(changedItem: ToDoItem): Boolean = {
     if (cache.contains(changedItem.id)) {
       cache = cache + (changedItem.id -> changedItem)
@@ -37,15 +47,6 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
     else {
       false
     }
-  }
-
-  override def add(newItem: String): Option[ToDoItem] = newItem.trim match {
-    case "" => None
-    case _ =>
-      val newToDo = ToDoItem(text = newItem)
-      cache += (newToDo.id -> newToDo)
-      persist(PersistingToDoItem(newToDo.id, Some(newToDo)))
-      Some(newToDo)
   }
 
   override def get(id: String): Option[ToDoItem] =

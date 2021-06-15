@@ -1,14 +1,14 @@
 package de.quinesoft.checklist.persistence
 
 import java.nio.file.{Files, Path}
-
 import akka.actor.ActorSystem
 import de.quinesoft.checklist.config.{StorageConfig, WriteDelaySec}
 import de.quinesoft.checklist.model.ToDoItem
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class MapStoreTest extends AnyFlatSpec with Matchers {
+class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
   private val storagePath: Path = Files.createTempDirectory("scalatest_mapstore")
 
   val config: StorageConfig = StorageConfig(storagePath.toString, WriteDelaySec(1))
@@ -18,43 +18,44 @@ class MapStoreTest extends AnyFlatSpec with Matchers {
   val sut = new MapStore(config)
 
   "add" should "add a new item to the store" in {
-    sut.add("Milk") match {
-      case Some(item) => item.text shouldBe "Milk"
-      case None => fail("There should have been a new item")
-    }
+    val newItem = ToDoItem.create("Milk").get
+
+    sut.get(newItem.id) shouldBe None
+    sut.add(newItem) shouldBe true
+    sut.get(newItem.id) shouldBe Some(newItem)
   }
 
-  it should "not add a new item with no name" in {
-    sut.add("  ") match {
-      case Some(item) => fail(s"there should have been no $item")
-      case None => succeed
-    }
+  it should "not add a new item twice" in {
+    val newItem = ToDoItem.create("Milk").get
+    sut.get(newItem.id) shouldBe None
+    sut.add(newItem) shouldBe true
+    sut.get(newItem.id) shouldBe Some(newItem)
+    sut.add(newItem) shouldBe false
+    sut.get(newItem.id) shouldBe Some(newItem)
   }
 
   "update" should "update an existing item" in {
-    sut.add("Milk") match {
-      case Some(value) =>
-        val update = value.copy(text = "Molk")
-        sut.update(update) shouldBe true
-      case None => fail("there should have been an item")
-    }
+    val newItem = ToDoItem.create("Milk").get
+    sut.add(newItem) shouldBe true
+
+    val changedItem = newItem.copy(text = "Molk")
+    sut.update(changedItem) shouldBe true
   }
 
   it should "not allow updates of unknown items" in {
-    val item = ToDoItem(text = "Mjölk")
+    val item = ToDoItem.create("Milk").get
     sut.update(item) shouldBe false
   }
 
   "delete" should "remove an item" in {
-    sut.add("Cheese") match {
-      case Some(item) =>
-        val id = item.id
-        sut.delete(id)
-        sut.get(id) match {
-          case Some(_) => fail("There should not be an item")
-          case None => succeed
-        }
-      case None => fail("Cheese was not added to the list")
-    }
+    val newItem = ToDoItem.create("Milk").get
+    sut.add(newItem) shouldBe true
+    sut.get(newItem.id) shouldBe Some(newItem)
+    sut.delete(newItem.id)
+    sut.get(newItem.id) shouldBe None
+  }
+
+  override protected def afterEach(): Unit = {
+    sut.keys.foreach(sut.delete)
   }
 }

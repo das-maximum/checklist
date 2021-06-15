@@ -14,7 +14,7 @@ import java.util.UUID
  */
 object Endpoints {
   type AuthToken = String
-  val AUTH_HEADER = "X-Auth-Token"
+  val AUTH_HEADER: AuthToken = "X-Auth-Token"
 
   private val basePath: Endpoint[Unit, Unit, Unit, Any] = endpoint
     .in("api" / "todo")

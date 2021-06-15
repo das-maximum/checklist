@@ -3,11 +3,12 @@ package de.quinesoft.checklist.routes
 import de.quinesoft.checklist.routes.Endpoints._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import de.quinesoft.checklist.model.ToDoItem
 import de.quinesoft.checklist.persistence.ChecklistStore
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 
 import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 final class Routes(store: ChecklistStore)(implicit val ec: ExecutionContext) {
   import AkkaHttpServerInterpreter.toRoute
@@ -33,9 +34,16 @@ final class Routes(store: ChecklistStore)(implicit val ec: ExecutionContext) {
         val text = tokenAndText._2
 
         successful {
-          store.add(text) match {
-            case Some(value) => Right(value)
-            case None => Left("No such item")
+          ToDoItem.create(text) match {
+            case Some(item) =>
+              if (store.add(item)) {
+                Right(item)
+              }
+              else {
+                Left("Item with the same ID already present")
+              }
+            case None =>
+              Left("Could not create item")
           }
         }
       }) ~

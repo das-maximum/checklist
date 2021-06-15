@@ -6,7 +6,7 @@ import de.quinesoft.checklist.model.ToDoItem
  * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
  */
 trait ChecklistStore {
-  def add(newItem: String): Option[ToDoItem]
+  def add(newItem: ToDoItem): Boolean
 
   def update(changedItem: ToDoItem): Boolean
 
