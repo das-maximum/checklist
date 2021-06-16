@@ -6,6 +6,11 @@ import io.circe.generic.semiauto._
 
 import scala.collection.immutable
 
+case class Login(name: String, password: String)
+object Login {
+  implicit val loginCodec: Codec[Login] = deriveCodec[Login]
+}
+
 sealed trait Role extends EnumEntry
 object Role extends Enum[Role] with CirceEnum[Role] {
 
