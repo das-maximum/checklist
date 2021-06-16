@@ -15,14 +15,15 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.ExecutionContext
 import scala.io.{BufferedSource, Codec, Source}
 
-/**
- * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
- */
-class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor: ActorSystem) extends ChecklistStore with PersistentStore {
+/** @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
+  */
+class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor: ActorSystem)
+    extends ChecklistStore
+    with PersistentStore {
 
   private val logger = Logger(classOf[MapStore])
 
-  private var cache: Map[String, ToDoItem] = Map.empty
+  private var cache: Map[String, ToDoItem]               = Map.empty
   private var persistingQueue: Queue[PersistingToDoItem] = Queue.empty
 
   loadExistingItems()
@@ -31,8 +32,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   override def add(newItem: ToDoItem): Boolean =
     if (cache.contains(newItem.id)) {
       false
-    }
-    else {
+    } else {
       cache += (newItem.id -> newItem)
       persist(PersistingToDoItem(newItem.id, Some(newItem)))
       true
@@ -43,8 +43,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
       cache = cache + (changedItem.id -> changedItem)
       persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
       true
-    }
-    else {
+    } else {
       false
     }
   }
@@ -69,23 +68,26 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   private def loadExistingItems(): Unit = {
     logger.info("Loading stored items")
 
-    Files.newDirectoryStream(Paths.get(storage.path)).forEach(
-      singleFile => {
+    Files
+      .newDirectoryStream(Paths.get(storage.path))
+      .forEach(singleFile => {
         logger.debug(s"Reading in file ${singleFile.toString}")
         val source: BufferedSource = Source.fromFile(singleFile.toUri)(Codec.UTF8)
         val item: Result[ToDoItem] = source.mkString.asJson.as[ToDoItem]
 
         item match {
-          case Left(value) => logger.warn(s"Could not parse $singleFile: $value")
+          case Left(value)  => logger.warn(s"Could not parse $singleFile: $value")
           case Right(value) => cache += (value.id -> value)
         }
         source.close()
-      }
-    )
+      })
   }
 
-  private def startPersisting(): Unit = actor.scheduler.scheduleAtFixedRate(initialDelay = FiniteDuration(0, TimeUnit.SECONDS), interval = FiniteDuration(storage.writeDelaySec.number, TimeUnit.SECONDS)) {
-    () => writeToDisk()
+  private def startPersisting(): Unit = actor.scheduler.scheduleAtFixedRate(
+    initialDelay = FiniteDuration(0, TimeUnit.SECONDS),
+    interval = FiniteDuration(storage.writeDelaySec.number, TimeUnit.SECONDS)
+  ) { () =>
+    writeToDisk()
   }
 
   private def writeToDisk(): Unit = {
@@ -97,7 +99,6 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
         val path: Path = Paths.get(storage.path).resolve(item.id)
         item.todo match {
           case Some(value) =>
-
             logger.debug(s"Writing $path")
             Files.writeString(
               path,
@@ -105,7 +106,8 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
               StandardCharsets.UTF_8,
               StandardOpenOption.CREATE,
               StandardOpenOption.WRITE,
-              StandardOpenOption.TRUNCATE_EXISTING)
+              StandardOpenOption.TRUNCATE_EXISTING
+            )
           case None =>
             logger.debug(s"Deleting item ${item.id} @ $path")
             Files.deleteIfExists(path)

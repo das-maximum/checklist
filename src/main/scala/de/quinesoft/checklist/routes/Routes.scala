@@ -19,64 +19,61 @@ final class Routes(store: ChecklistStore)(implicit val ec: ExecutionContext) {
       toRoute(getIds)(token => {
         successful(Right(store.keys))
       }) ~
-      // get single item
-      toRoute(getItem)(tokenAndUuid => {
-        val uuid = tokenAndUuid._2.toString
+        // get single item
+        toRoute(getItem)(tokenAndUuid => {
+          val uuid = tokenAndUuid._2.toString
 
-        successful {
-          store.get(uuid) match {
-            case Some(value) => Right(value)
-            case None => Left("No such item")
+          successful {
+            store.get(uuid) match {
+              case Some(value) => Right(value)
+              case None        => Left("No such item")
+            }
           }
-        }
-      }) ~
-      toRoute(newItem)(tokenAndText => {
-        val text = tokenAndText._2
+        }) ~
+        toRoute(newItem)(tokenAndText => {
+          val text = tokenAndText._2
 
-        successful {
-          ToDoItem.create(text) match {
-            case Some(item) =>
-              if (store.add(item)) {
-                Right(item)
-              }
-              else {
-                Left("Item with the same ID already present")
-              }
-            case None =>
-              Left("Could not create item")
+          successful {
+            ToDoItem.create(text) match {
+              case Some(item) =>
+                if (store.add(item)) {
+                  Right(item)
+                } else {
+                  Left("Item with the same ID already present")
+                }
+              case None =>
+                Left("Could not create item")
+            }
           }
-        }
-      }) ~
-      toRoute(updateItem)(tokenAndUuidAndToDoItem => {
-        val updatedItem = tokenAndUuidAndToDoItem._3
-        successful {
-          if (store.update(updatedItem)) {
-            Right("Successfully updated")
-          } else {
-            Left("Unknown item")
+        }) ~
+        toRoute(updateItem)(tokenAndUuidAndToDoItem => {
+          val updatedItem = tokenAndUuidAndToDoItem._3
+          successful {
+            if (store.update(updatedItem)) {
+              Right("Successfully updated")
+            } else {
+              Left("Unknown item")
+            }
           }
-        }
-      }) ~
-      toRoute(deleteItem)(tokenAndUuid => {
-        val uuid = tokenAndUuid._2.toString
+        }) ~
+        toRoute(deleteItem)(tokenAndUuid => {
+          val uuid = tokenAndUuid._2.toString
 
-        successful {
-          store.delete(uuid)
-          Right("Item deleted")
-        }
-      }) ~
-      toRoute(getAllTodos)(token => {
-        successful {
-          Right(store.getAll)
-        }
-      }) ~
-      toRoute(version)( _=> {
-        successful {
-          Right("0.0.2")
-        }
-      })
+          successful {
+            store.delete(uuid)
+            Right("Item deleted")
+          }
+        }) ~
+        toRoute(getAllTodos)(token => {
+          successful {
+            Right(store.getAll)
+          }
+        }) ~
+        toRoute(version)(_ => {
+          successful {
+            Right("0.0.2")
+          }
+        })
     }
   }
 }
-
-

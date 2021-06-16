@@ -10,7 +10,7 @@ sealed trait Role extends EnumEntry
 object Role extends Enum[Role] with CirceEnum[Role] {
 
   case object Admin extends Role
-  case object User extends Role
+  case object User  extends Role
 
   override def values: immutable.IndexedSeq[Role] = findValues
 }

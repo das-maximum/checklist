@@ -17,11 +17,17 @@ import org.scalatest.matchers.should.Matchers
 
 import java.util.UUID
 
-class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with ScalatestRouteTest with BeforeAndAfterEach with FailFastCirceSupport {
+class RoutesTest
+    extends AnyFlatSpec
+    with Matchers
+    with ScalaFutures
+    with ScalatestRouteTest
+    with BeforeAndAfterEach
+    with FailFastCirceSupport {
 
   import ToDoItem._
 
-  lazy val testKit: ActorTestKit = ActorTestKit()
+  lazy val testKit: ActorTestKit                 = ActorTestKit()
   implicit def typedSystem: ActorSystem[Nothing] = testKit.system
 
   override protected def createActorSystem(): actor.ActorSystem =
@@ -30,7 +36,7 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
   val authHeader: List[HttpHeader] = List(RawHeader(Endpoints.AUTH_HEADER, "123abc"))
 
   var storeStub: ChecklistStore = _
-  var sut: Route = _
+  var sut: Route                = _
 
   override protected def beforeEach(): Unit = {
     storeStub = new ChecklistStoreTestStub
@@ -40,7 +46,7 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
   "Route (GET /api/todo)" should "return an empty list" in {
     val request = HttpRequest(uri = "/api/todo", headers = authHeader)
 
-    request  ~> sut ~> check {
+    request ~> sut ~> check {
       status shouldBe StatusCodes.OK
       contentType shouldBe ContentTypes.`application/json`
 
@@ -118,7 +124,12 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
     storeStub.keys.size shouldBe 0
 
     val todoBody = HttpEntity(ContentTypes.`text/plain(UTF-8)`, "Cucumber")
-    val request = HttpRequest(uri = "/api/todo", method = HttpMethods.POST, headers = authHeader, entity = todoBody)
+    val request = HttpRequest(
+      uri = "/api/todo",
+      method = HttpMethods.POST,
+      headers = authHeader,
+      entity = todoBody
+    )
 
     request ~> sut ~> check {
       status shouldBe StatusCodes.OK
@@ -137,7 +148,12 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
     import io.circe.syntax._
 
     val todoBody = HttpEntity(ContentTypes.`application/json`, gurkin.asJson.toString)
-    val request = HttpRequest(uri = s"/api/todo/${cucumber.id}", method = HttpMethods.PUT, headers = authHeader, entity = todoBody)
+    val request = HttpRequest(
+      uri = s"/api/todo/${cucumber.id}",
+      method = HttpMethods.PUT,
+      headers = authHeader,
+      entity = todoBody
+    )
 
     request ~> sut ~> check {
       status shouldBe StatusCodes.OK
@@ -151,8 +167,16 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
 
     import io.circe.syntax._
 
-    val todoBody = HttpEntity(ContentTypes.`application/json`, cucumber.copy(id = cucumber.id.replaceAll("-", ".")).asJson.toString)
-    val request = HttpRequest(uri = s"/api/todo/${cucumber.id}", method = HttpMethods.PUT, headers = authHeader, entity = todoBody)
+    val todoBody = HttpEntity(
+      ContentTypes.`application/json`,
+      cucumber.copy(id = cucumber.id.replaceAll("-", ".")).asJson.toString
+    )
+    val request = HttpRequest(
+      uri = s"/api/todo/${cucumber.id}",
+      method = HttpMethods.PUT,
+      headers = authHeader,
+      entity = todoBody
+    )
 
     request ~> sut ~> check {
       status shouldBe StatusCodes.BadRequest
@@ -165,7 +189,11 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
 
     storeStub.keys.size shouldBe 1
 
-    val request = HttpRequest(uri = s"/api/todo/${cucumber.id}", method = HttpMethods.DELETE, headers = authHeader)
+    val request = HttpRequest(
+      uri = s"/api/todo/${cucumber.id}",
+      method = HttpMethods.DELETE,
+      headers = authHeader
+    )
 
     request ~> sut ~> check {
       status shouldBe StatusCodes.OK
@@ -179,7 +207,11 @@ class RoutesTest extends AnyFlatSpec with Matchers with ScalaFutures with Scalat
 
     storeStub.keys.size shouldBe 1
 
-    val request = HttpRequest(uri = s"/api/todo/${UUID.randomUUID()}", method = HttpMethods.DELETE, headers = authHeader)
+    val request = HttpRequest(
+      uri = s"/api/todo/${UUID.randomUUID()}",
+      method = HttpMethods.DELETE,
+      headers = authHeader
+    )
 
     request ~> sut ~> check {
       status shouldBe StatusCodes.OK
@@ -194,8 +226,7 @@ class ChecklistStoreTestStub extends ChecklistStore {
   override def add(newItem: ToDoItem): Boolean =
     if (map.contains(newItem.id)) {
       false
-    }
-    else {
+    } else {
       map = map + (newItem.id -> newItem)
       true
     }
@@ -204,8 +235,7 @@ class ChecklistStoreTestStub extends ChecklistStore {
     if (map.contains(changedItem.id)) {
       map = map + (changedItem.id -> changedItem)
       true
-    }
-    else {
+    } else {
       false
     }
 
