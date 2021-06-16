@@ -8,6 +8,7 @@ notifications:
     on_success: always
     on_failure: always
 script:
+- sbt scalafmtCheckAll || travis_terminate 1
 - sbt compile || travis_terminate 1
 - sbt coverage test coverageReport || travis_terminate 1
 - sbt coverageAggregate

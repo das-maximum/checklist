@@ -6,9 +6,8 @@ import io.circe.generic.semiauto.deriveCodec
 import java.time.Instant
 import java.util.UUID
 
-/**
- * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
- */
+/** @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
+  */
 case class ToDoItem(id: String, text: String, created: Instant, done: Boolean, deleted: Boolean)
 object ToDoItem {
   def create(text: String): Option[ToDoItem] = {
@@ -21,7 +20,7 @@ object ToDoItem {
           text,
           Instant.now(),
           done = false,
-          deleted = false,
+          deleted = false
         )
       )
     }

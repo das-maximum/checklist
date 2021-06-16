@@ -2,9 +2,8 @@ package de.quinesoft.checklist.persistence
 
 import de.quinesoft.checklist.model.ToDoItem
 
-/**
- * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
- */
+/** @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
+  */
 trait ChecklistStore {
   def add(newItem: ToDoItem): Boolean
 

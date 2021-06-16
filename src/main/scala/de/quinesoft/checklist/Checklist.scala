@@ -15,13 +15,12 @@ import pureconfig.generic.auto._
 
 import scala.concurrent.ExecutionContext
 
-/**
- * @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
- */
+/** @author <a href="mailto:krickl@quinesoft.de>Maximilian Krickl</a>
+  */
 object Checklist extends App {
-  private val logger: Logger = Logger(Checklist.getClass.getCanonicalName)
+  private val logger: Logger                = Logger(Checklist.getClass.getCanonicalName)
   private implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-  private implicit val system: ActorSystem = ActorSystem("checklist")
+  private implicit val system: ActorSystem  = ActorSystem("checklist")
 
   logger.info("Loading config")
   val config: ChecklistConfig = ConfigSource.default.loadOrThrow[ChecklistConfig]
@@ -39,8 +38,13 @@ object Checklist extends App {
 
   private def writePidFile(): Unit = {
     val pidPath: Path = Paths.get("./checklist.pid")
-    val pid: String = ManagementFactory.getRuntimeMXBean.getName.split('@')(0)
-    val writer: BufferedWriter = Files.newBufferedWriter(pidPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+    val pid: String   = ManagementFactory.getRuntimeMXBean.getName.split('@')(0)
+    val writer: BufferedWriter = Files.newBufferedWriter(
+      pidPath,
+      StandardCharsets.UTF_8,
+      StandardOpenOption.CREATE,
+      StandardOpenOption.TRUNCATE_EXISTING
+    )
     writer.write(pid)
     writer.close()
   }
