@@ -7,11 +7,11 @@ import de.quinesoft.checklist.model.ToDoItem
 import de.quinesoft.checklist.persistence.ChecklistStore
 import sttp.tapir.server.akkahttp.AkkaHttpServerInterpreter
 
-import scala.concurrent.Future.successful
 import scala.concurrent.ExecutionContext
 
 final class Routes(store: ChecklistStore)(implicit val ec: ExecutionContext) {
   import AkkaHttpServerInterpreter.toRoute
+  import scala.concurrent.Future.successful
 
   val routes: Route = {
     concat {

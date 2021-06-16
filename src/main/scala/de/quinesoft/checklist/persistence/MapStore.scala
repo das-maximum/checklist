@@ -52,7 +52,7 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   override def get(id: String): Option[ToDoItem] =
     cache.get(id)
 
-  override def getAll: List[ToDoItem] = cache.values.toList
+  override def getAll: Set[ToDoItem] = cache.values.toSet
 
   override def delete(id: String): Unit = {
     cache -= id

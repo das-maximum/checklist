@@ -53,11 +53,11 @@ object Endpoints {
     .errorOut(stringBody)
     .out(stringBody)
 
-  val getAllTodos: Endpoint[AuthToken, Unit, List[ToDoItem], Any] = basePath
+  val getAllTodos: Endpoint[AuthToken, Unit, Set[ToDoItem], Any] = basePath
     .get
     .in("full")
     .in(header[AuthToken](AUTH_HEADER))
-    .out(jsonBody[List[ToDoItem]])
+    .out(jsonBody[Set[ToDoItem]])
 
   val version: Endpoint[Unit, Unit, String, Any] = endpoint
     .get

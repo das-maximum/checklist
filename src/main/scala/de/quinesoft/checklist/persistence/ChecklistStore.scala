@@ -14,7 +14,7 @@ trait ChecklistStore {
 
   def get(id: String): Option[ToDoItem]
 
-  def getAll: List[ToDoItem]
+  def getAll: Set[ToDoItem]
 
   def keys: Set[String]
 }
