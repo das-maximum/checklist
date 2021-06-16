@@ -8,12 +8,12 @@ import io.circe.Json
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import pdi.jwt.{JwtAlgorithm, JwtCirce}
 
-import java.security.{KeyPairGenerator, SecureRandom, Security}
+import java.security.{KeyPair, KeyPairGenerator, SecureRandom, Security}
 import java.security.spec.ECGenParameterSpec
 import scala.util.{Failure, Success}
 
 trait Authentication {
-  def verifyUser: Login => Boolean = {}
+  def verifyUser: Login => Boolean = ???
 
   def setClaims(user: String): Json =
     Json.obj(
@@ -21,7 +21,7 @@ trait Authentication {
       ("role", Json.fromString("you can store anything"))
     )
 
-  val ecKey = {
+  val ecKey: KeyPair = {
     val ecGenSpec = new ECGenParameterSpec("P-521")
 
     if (Security.getProvider("BC") == null) {

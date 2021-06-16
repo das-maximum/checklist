@@ -23,6 +23,10 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core"    % circeVersion,
   "io.circe" %% "circe-parser"  % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
+  // JWT + Bouncycastle
+  "com.pauldijou"   %% "jwt-core"     % "4.2.0",
+  "com.pauldijou"   %% "jwt-circe"    % "4.2.0",
+  "org.bouncycastle" % "bcprov-jdk16" % "1.46",
   // Enumeratum
   "com.beachape" %% "enumeratum"       % enumeratumVersion,
   "com.beachape" %% "enumeratum-circe" % enumeratumVersion,
