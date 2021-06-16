@@ -15,7 +15,12 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
 
   implicit val actor: ActorSystem = ActorSystem("TestActor")
   import scala.concurrent.ExecutionContext.Implicits.global
-  val sut = new MapStore(config)
+
+  var sut: ChecklistStore = _
+
+  override def beforeEach(): Unit = {
+    sut = new MapStore(config)
+  }
 
   "add" should "add a new item to the store" in {
     val newItem = ToDoItem.create("Milk").get
@@ -53,9 +58,5 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
     sut.get(newItem.id) shouldBe Some(newItem)
     sut.delete(newItem.id)
     sut.get(newItem.id) shouldBe None
-  }
-
-  override protected def afterEach(): Unit = {
-    sut.keys.foreach(sut.delete)
   }
 }
