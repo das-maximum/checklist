@@ -1,5 +1,7 @@
 *.class
 *.log
+*.DS_Store
+checklist.pid
 /.idea/
 /target/
 /project/project/
