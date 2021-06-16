@@ -3,7 +3,6 @@ package de.quinesoft.checklist.persistence
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 import java.util.concurrent.TimeUnit
-import akka.Done
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.StorageConfig
@@ -13,7 +12,7 @@ import io.circe.syntax.EncoderOps
 
 import scala.collection.immutable.Queue
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.io.{BufferedSource, Codec, Source}
 
 /**
@@ -29,39 +28,40 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
   loadExistingItems()
   startPersisting()
 
-  override def update(changedItem: ToDoItem): Future[Done] = {
-    if (!cache.contains(changedItem.id)) {
-      Future.failed(new UnsupportedOperationException("Cannot change unknown item"))
+  override def add(newItem: ToDoItem): Boolean =
+    if (cache.contains(newItem.id)) {
+      false
     }
     else {
+      cache += (newItem.id -> newItem)
+      persist(PersistingToDoItem(newItem.id, Some(newItem)))
+      true
+    }
+
+  override def update(changedItem: ToDoItem): Boolean = {
+    if (cache.contains(changedItem.id)) {
       cache = cache + (changedItem.id -> changedItem)
       persist(PersistingToDoItem(changedItem.id, Some(changedItem)))
-      Future.successful(Done)
+      true
+    }
+    else {
+      false
     }
   }
 
-  override def add(newItem: String): Future[Option[ToDoItem]] = newItem.trim match {
-    case "" => Future.successful(None)
-    case _ =>
-      val newToDo = ToDoItem(text = newItem)
-      cache += (newToDo.id -> newToDo)
-      persist(PersistingToDoItem(newToDo.id, Some(newToDo)))
-      Future.successful(Some(newToDo))
-  }
+  override def get(id: String): Option[ToDoItem] =
+    cache.get(id)
 
-  override def get(id: String): Future[Option[ToDoItem]] =
-    Future.successful(cache.get(id))
+  override def getAll: Set[ToDoItem] = cache.values.toSet
 
-  override def getAll: Future[List[ToDoItem]] = Future.successful(cache.values.toList)
-
-  override def delete(id: String): Future[Done] = {
+  override def delete(id: String): Unit = {
     cache -= id
     persist(PersistingToDoItem(id, None))
-    Future.successful(Done)
+    ()
   }
 
-  override def keys: Future[Set[String]] =
-    Future.successful(cache.keySet)
+  override def keys: Set[String] =
+    cache.keySet
 
   override def persist(item: PersistingToDoItem): Unit =
     persistingQueue = persistingQueue :+ item

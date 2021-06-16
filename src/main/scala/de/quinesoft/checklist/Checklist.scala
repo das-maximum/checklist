@@ -4,12 +4,12 @@ import java.io.BufferedWriter
 import java.lang.management.ManagementFactory
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths, StandardOpenOption}
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.ChecklistConfig
-import de.quinesoft.checklist.routes.Routing
+import de.quinesoft.checklist.persistence.MapStore
+import de.quinesoft.checklist.routes.Routes
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
@@ -26,11 +26,16 @@ object Checklist extends App {
   logger.info("Loading config")
   val config: ChecklistConfig = ConfigSource.default.loadOrThrow[ChecklistConfig]
 
+  logger.info("Connect to storage")
+  val store: MapStore = new MapStore(config.storage)
+
   logger.debug("Write pid file")
   writePidFile()
 
   logger.info("Starting server")
-  Http().bindAndHandle(new Routing(config).routes, config.host, config.port.number)
+  Http()
+    .newServerAt(config.host, config.port.number)
+    .bind(new Routes(store).routes)
 
   private def writePidFile(): Unit = {
     val pidPath: Path = Paths.get("./checklist.pid")

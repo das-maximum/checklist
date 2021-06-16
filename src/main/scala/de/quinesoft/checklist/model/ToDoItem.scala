@@ -11,15 +11,21 @@ import java.util.UUID
  */
 case class ToDoItem(id: String, text: String, created: Instant, done: Boolean, deleted: Boolean)
 object ToDoItem {
-  def apply(text: String): ToDoItem = {
-    ToDoItem(
-      UUID.randomUUID().toString,
-      text,
-      Instant.now(),
-      done = false,
-      deleted = false,
-    )
+  def create(text: String): Option[ToDoItem] = {
+    if (text.trim() == "") {
+      None
+    } else {
+      Some(
+        ToDoItem(
+          UUID.randomUUID().toString,
+          text,
+          Instant.now(),
+          done = false,
+          deleted = false,
+        )
+      )
+    }
   }
 
-  implicit val todoitemCodec: Codec[ToDoItem] = deriveCodec
+  implicit val todoItemCodec: Codec[ToDoItem] = deriveCodec
 }
