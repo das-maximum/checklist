@@ -61,33 +61,33 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
   }
 
   "getAll" should "respond with all items" in {
-    val allItems: Future[Seq[ToDoItem]] = for {
-      _                       <- sut.add("Cheese")
-      _                       <- sut.add("Milk")
-      _                       <- sut.add("Bread")
-      allItems: Seq[ToDoItem] <- sut.getAll
-    } yield allItems
+    val inputItems: Set[ToDoItem] = Set(
+      ToDoItem.create("Cheese").get,
+      ToDoItem.create("Milk").get,
+      ToDoItem.create("Bread").get
+    )
 
-    allItems.onComplete {
-      case Failure(exception) => fail(exception)
-      case Success(value) =>
-        value.size shouldBe 3
-        value should contain allElementsOf List("Cheese", "Milk", "Bread")
-    }
+    inputItems.foreach(sut.add)
+
+    val allItems: Set[ToDoItem] = sut.getAll
+
+    allItems.size shouldBe 3
+    allItems should contain allElementsOf inputItems
+
   }
 
   "keys" should "result the same number of elements" in {
-    val keys: Future[Set[String]] = for {
-      _                 <- sut.add("Cheese")
-      _                 <- sut.add("Milk")
-      _                 <- sut.add("Bread")
-      keys: Set[String] <- sut.keys
-    } yield keys
+    val inputItems: Set[ToDoItem] = Set(
+      ToDoItem.create("Cheese").get,
+      ToDoItem.create("Milk").get,
+      ToDoItem.create("Bread").get
+    )
 
-    keys.onComplete {
-      case Failure(exception) => fail(exception)
-      case Success(value) =>
-        value.size shouldBe 3
-    }
+    inputItems.foreach(sut.add)
+    val compareSet: Set[String] = inputItems.map(_.id)
+
+    val allKeys: Set[String] = sut.keys
+
+    allKeys should contain allElementsOf compareSet
   }
 }
