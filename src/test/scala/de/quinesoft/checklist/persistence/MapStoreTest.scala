@@ -59,4 +59,35 @@ class MapStoreTest extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
     sut.delete(newItem.id)
     sut.get(newItem.id) shouldBe None
   }
+
+  "getAll" should "respond with all items" in {
+    val inputItems: Set[ToDoItem] = Set(
+      ToDoItem.create("Cheese").get,
+      ToDoItem.create("Milk").get,
+      ToDoItem.create("Bread").get
+    )
+
+    inputItems.foreach(sut.add)
+
+    val allItems: Set[ToDoItem] = sut.getAll
+
+    allItems.size shouldBe 3
+    allItems should contain allElementsOf inputItems
+
+  }
+
+  "keys" should "result the same number of elements" in {
+    val inputItems: Set[ToDoItem] = Set(
+      ToDoItem.create("Cheese").get,
+      ToDoItem.create("Milk").get,
+      ToDoItem.create("Bread").get
+    )
+
+    inputItems.foreach(sut.add)
+    val compareSet: Set[String] = inputItems.map(_.id)
+
+    val allKeys: Set[String] = sut.keys
+
+    allKeys should contain allElementsOf compareSet
+  }
 }

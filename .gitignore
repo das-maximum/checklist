@@ -3,7 +3,7 @@
 *.DS_Store
 checklist.pid
 /.idea/
+/.bsp/
 /target/
 /project/project/
 /project/target/
-/.bsp/

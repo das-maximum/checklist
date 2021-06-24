@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import com.typesafe.scalalogging.Logger
 import de.quinesoft.checklist.config.StorageConfig
 import de.quinesoft.checklist.model.ToDoItem
-import io.circe.Decoder.Result
+import io.circe.parser._
 import io.circe.syntax.EncoderOps
 
 import scala.collection.immutable.Queue
@@ -25,6 +25,8 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
 
   private var cache: Map[String, ToDoItem]               = Map.empty
   private var persistingQueue: Queue[PersistingToDoItem] = Queue.empty
+
+  private implicit val fileCodec: Codec = Codec.UTF8
 
   loadExistingItems()
   startPersisting()
@@ -72,12 +74,15 @@ class MapStore(storage: StorageConfig)(implicit val ec: ExecutionContext, actor:
       .newDirectoryStream(Paths.get(storage.path))
       .forEach(singleFile => {
         logger.debug(s"Reading in file ${singleFile.toString}")
-        val source: BufferedSource = Source.fromFile(singleFile.toUri)(Codec.UTF8)
-        val item: Result[ToDoItem] = source.mkString.asJson.as[ToDoItem]
-
-        item match {
-          case Left(value)  => logger.warn(s"Could not parse $singleFile: $value")
-          case Right(value) => cache += (value.id -> value)
+        val source: BufferedSource = Source.fromFile(singleFile.toUri)
+        parse(source.mkString) match {
+          case Left(exception) => logger.warn(s"Could not parse $singleFile: $exception")
+          case Right(json) =>
+            json.as[ToDoItem] match {
+              case Left(exception) =>
+                logger.warn(s"Could not encode ToDoItem from $singleFile ($json): $exception")
+              case Right(item) => cache += (item.id -> item)
+            }
         }
         source.close()
       })
